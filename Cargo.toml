@@ -1,3 +1,3 @@
 [workspace]
-members = ["task_1", "task_2", "task_3"]
+members = ["task_1", "task_2", "task_3", "task_4"]
 resolver = "2"
