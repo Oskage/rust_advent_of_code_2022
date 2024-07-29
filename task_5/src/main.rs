@@ -12,12 +12,6 @@ enum CraneType {
     CrateMover9001,
 }
 
-// impl FromIterator<i32> for Command {
-//     fn from_iter<T: IntoIterator<Item = i32>>(_: T) -> Self {
-//         todo!()
-//     }
-// }
-
 fn fill_level(state: &mut Vec<Vec<char>>, level: String) {
     for (i, box_) in level.chars().skip(1).step_by(4).enumerate() {
         if !box_.is_ascii_whitespace() {
@@ -53,11 +47,6 @@ fn read_state(stdin: &Stdin) -> Vec<Vec<char>> {
 fn read_commands(stdin: &Stdin) -> Vec<Command> {
     let mut commands = vec![];
 
-    // stdin
-    //     .lock()
-    //     .lines()
-    //     .filter_map(Result::ok)
-    //     .map(|l| l.split_ascii_whitespace().skip(1).step_by(2).collect())
     for line in stdin.lock().lines().filter_map(Result::ok) {
         let command_items: Vec<i32> = line
             .split_ascii_whitespace()
