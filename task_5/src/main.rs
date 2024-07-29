@@ -1,13 +1,15 @@
-use std::{
-    fmt::Error,
-    io::{stdin, BufRead, Stdin},
-};
+use std::io::{stdin, BufRead, Stdin};
 
 #[derive(Debug)]
 struct Command {
     cnt: i32,
-    src: i32,
-    dst: i32,
+    src: usize,
+    dst: usize,
+}
+
+enum CraneType {
+    CrateMover9000,
+    CrateMover9001,
 }
 
 // impl FromIterator<i32> for Command {
@@ -66,25 +68,41 @@ fn read_commands(stdin: &Stdin) -> Vec<Command> {
             .collect();
         commands.push(Command {
             cnt: command_items[0],
-            src: command_items[1],
-            dst: command_items[2],
+            src: (command_items[1] - 1) as usize,
+            dst: (command_items[2] - 1) as usize,
         });
     }
 
     commands
 }
 
-fn apply_command(state: &mut Vec<Vec<char>>, command: Command) {}
+fn apply_command(state: &mut Vec<Vec<char>>, command: &Command, crane_type: CraneType) {
+    let src_n_boxes = state[command.src].len();
+    let boxes: Vec<char> = match crane_type {
+        CraneType::CrateMover9000 => state[command.src]
+            .drain((src_n_boxes - command.cnt as usize)..)
+            .rev()
+            .collect(),
+        CraneType::CrateMover9001 => state[command.src]
+            .drain((src_n_boxes - command.cnt as usize)..)
+            .collect(),
+    };
+    state[command.dst].extend(boxes);
+}
 
 fn main() {
     let stdin = stdin();
-    let mut state = read_state(&stdin);
+    let mut part1_state = read_state(&stdin);
+    let mut part2_state = part1_state.clone();
     let commands = read_commands(&stdin);
     for command in commands {
-        apply_command(&mut state, command)
+        apply_command(&mut part1_state, &command, CraneType::CrateMover9000);
+        apply_command(&mut part2_state, &command, CraneType::CrateMover9001);
     }
 
-    // println!("{state:?}");
+    let part1_answer: String = part1_state.iter().filter_map(|x| x.last()).collect();
+    let part2_answer: String = part2_state.iter().filter_map(|x| x.last()).collect();
 
-    // for line in stdin.lock().lines() {}
+    println!("part 1 : {part1_answer}");
+    println!("part 2 : {part2_answer}");
 }
