@@ -47,28 +47,41 @@ impl<T: Clone> Extend<T> for BoundedQueue<T> {
     }
 }
 
-fn main() {
-    let stdin = io::stdin();
-    let max_len: usize = 4;
-
-    let mut seen = BoundedQueue::new(max_len);
+fn solve(input: &mut String, signal_length: usize) -> usize {
+    let mut seen = BoundedQueue::new(signal_length);
     let mut marker: usize = 0;
-    let part1_answer = loop {
-        let ch = stdin.lock().bytes().filter_map(Result::ok).take(1).next();
+
+    let mut input_iter = input.chars();
+    loop {
+        let ch = input_iter.next();
         marker += 1;
 
         if let Some(ch) = ch {
             if let Some(pos) = seen.find_last(&ch) {
                 seen.erase_front(pos + 1);
                 seen.push(ch);
-            } else if seen.len() < max_len - 1 {
+            } else if seen.len() < signal_length - 1 {
                 seen.push(ch);
                 continue;
             } else {
                 break marker;
             }
         }
-    };
+    }
+}
+
+fn main() {
+    let stdin = io::stdin();
+
+    let mut input = String::new();
+    stdin
+        .lock()
+        .read_to_string(&mut input)
+        .expect("Failed to read input");
+
+    let part1_answer = solve(&mut input, 4);
+    let part2_answer = solve(&mut input, 14);
 
     println!("part 1 : {part1_answer}");
+    println!("part 2 : {part2_answer}");
 }
