@@ -1,6 +1,5 @@
 use std::{
     collections::VecDeque,
-    fs::read,
     io::{self, Read},
 };
 
@@ -20,9 +19,13 @@ impl<T> BoundedQueue<T> {
 
     fn push(&mut self, item: T) {
         if self.queue.len() == self.max_length {
-            self.queue.pop_front(); // Remove the oldest item
+            self.queue.pop_front();
         }
         self.queue.push_back(item);
+    }
+
+    fn erase_front(&mut self, n: usize) {
+        self.queue.drain(..n);
     }
 
     fn len(&self) -> usize {
@@ -31,8 +34,8 @@ impl<T> BoundedQueue<T> {
 }
 
 impl<T: PartialEq> BoundedQueue<T> {
-    fn find(&self, item: &T) -> Option<usize> {
-        self.queue.iter().position(|r| r == item)
+    fn find_last(&self, item: &T) -> Option<usize> {
+        self.queue.iter().rposition(|r| r == item)
     }
 }
 
@@ -44,55 +47,27 @@ impl<T: Clone> Extend<T> for BoundedQueue<T> {
     }
 }
 
-fn read_n_chars<R: Read>(stream: R, seen: &mut BoundedQueue<u8>, n: usize) {
-    seen.extend(stream.bytes().filter_map(Result::ok).take(n))
-}
-
 fn main() {
     let stdin = io::stdin();
+    let max_len: usize = 4;
 
-    let mut seen = BoundedQueue::new(4);
-    // while seen.len() != 4 {
-    //     let ch = stdin.lock().bytes().filter_map(Result::ok).take(1).next();
-    //     if let Some(ch) = ch {
-    //         if let Some(pos) = seen.find(&ch) {
-    //             read_n_chars(stdin.lock(), &mut seen, pos);
-    //             marker += pos;
-    //         } else {
-    //             break marker;
-    //         }
-    //     } else {
-    //         unreachable!();
-    //     };
-    // }
-    // read_n_chars(stdin.lock(), &mut seen, 4);
-
+    let mut seen = BoundedQueue::new(max_len);
     let mut marker: usize = 0;
     let part1_answer = loop {
         let ch = stdin.lock().bytes().filter_map(Result::ok).take(1).next();
         marker += 1;
 
         if let Some(ch) = ch {
-            if let Some(pos) = seen.find(&ch) {
-                read_n_chars(stdin.lock(), &mut seen, pos);
-                marker += pos;
+            if let Some(pos) = seen.find_last(&ch) {
+                seen.erase_front(pos + 1);
                 seen.push(ch);
-
-                let a: String = seen.queue.iter().map(|&x| x as char).collect();
-                println!("{a}");
-            } else if seen.len() < 4 {
+            } else if seen.len() < max_len - 1 {
                 seen.push(ch);
-
-                let a: String = seen.queue.iter().map(|&x| x as char).collect();
-                println!("{a}");
-
                 continue;
             } else {
                 break marker;
             }
-        } else {
-            unreachable!();
-        };
+        }
     };
 
     println!("part 1 : {part1_answer}");
